@@ -24,6 +24,8 @@ add_executable(edu-DirMonitor
 
   src/dirmonitor.h
   src/dirmonitor.cpp
+
+  test/dirmonitor_test.h
   )
 
 target_link_libraries(edu-DirMonitor PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
