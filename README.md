@@ -9,7 +9,8 @@ $ mkdir build && cd build
 $ cmake ..
 $ cmake --build .
 $ ./edu-DirMonitor
-windows pops up
+
+window pops up
 ```
 
 ## Running Tests
@@ -20,5 +21,6 @@ $ mkdir build && cd build
 $ cmake ..
 $ cmake --build .
 $ ./edu-DirMonitor-Test
+
 Running cxxtest tests (2 tests)..OK!
 ```

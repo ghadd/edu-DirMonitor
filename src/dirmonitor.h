@@ -4,12 +4,12 @@
 #include <QDateTime>
 #include <QDir>
 #include <QDirIterator>
+#include <QException>
 #include <QFile>
 #include <QFileInfo>
 #include <QString>
-#include <QVector>
 #include <QStringList>
-#include <QException>
+#include <QVector>
 
 struct FileInfo {
   QString filename;
@@ -19,10 +19,8 @@ struct FileInfo {
 
 class DirMonitor {
 public:
-    explicit DirMonitor(const QDir &dir)
-        : monitoringDir_(dir) {};
-    explicit DirMonitor(const QString &dirPath)
-        : monitoringDir_(QDir(dirPath)) {};
+  explicit DirMonitor(const QDir &dir) : monitoringDir_(dir){};
+  explicit DirMonitor(const QString &dirPath) : monitoringDir_(QDir(dirPath)){};
 
   QPair<QVector<FileInfo>, quint64> applyMonitor();
 
@@ -34,7 +32,7 @@ private:
 
 class PathError : public QException {
 public:
-    void raise() const override { throw *this; }
+  void raise() const override { throw *this; }
 };
 
 #endif // DIRMONITOR_H

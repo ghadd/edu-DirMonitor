@@ -4,18 +4,19 @@
 #include <QMainWindow>
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class App; }
+namespace Ui {
+class App;
+}
 QT_END_NAMESPACE
 
-class App : public QMainWindow
-{
-    Q_OBJECT
+class App : public QMainWindow {
+  Q_OBJECT
 
 public:
-    App(QWidget *parent = nullptr);
-    ~App();
+  App(QWidget *parent = nullptr);
+  ~App();
 
 private:
-    Ui::App *ui;
+  Ui::App *ui;
 };
 #endif // APP_H
