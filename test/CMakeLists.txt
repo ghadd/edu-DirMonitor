@@ -8,7 +8,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_SOURCE_DIR ../src)
@@ -25,5 +25,20 @@ if(CXXTEST_FOUND)
                       ${CMAKE_SOURCE_DIR}/dirmonitor.h
                       ${CMAKE_SOURCE_DIR}/dirmonitor.cpp)
 endif()
+
+find_path(HIREDIS_HEADER hiredis)
+find_library(HIREDIS_LIB hiredis)
+
+find_path(REDIS_PLUS_PLUS_HEADER sw)
+find_library(REDIS_PLUS_PLUS_LIB redis++)
+
+target_include_directories(edu-DirMonitor-Test PUBLIC ${HIREDIS_HEADER})
+target_link_libraries(edu-DirMonitor-Test PRIVATE ${HIREDIS_LIB})
+
+target_include_directories(edu-DirMonitor-Test PUBLIC ${REDIS_PLUS_PLUS_HEADER})
+target_link_libraries(edu-DirMonitor-Test PRIVATE ${REDIS_PLUS_PLUS_LIB})
+
+find_package(nlohmann_json 3.2.0 REQUIRED)
+target_link_libraries(edu-DirMonitor-Test PRIVATE nlohmann_json::nlohmann_json)
 
 target_link_libraries(edu-DirMonitor-Test PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)

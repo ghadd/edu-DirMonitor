@@ -1,5 +1,8 @@
 #include "../src/dirmonitor.h"
 #include <cxxtest/TestSuite.h>
+#include <thread>
+
+using namespace std::chrono_literals;
 
 void createFile(QString filePath) {
   QFile file(filePath);
@@ -44,4 +47,21 @@ public:
     DirMonitor monitor("|\\invalid_path");
     TS_ASSERT_THROWS(monitor.validatePath(), PathError);
   }
+
+  void testCachingPositive() {
+    DirMonitor monitor("..");
+    auto res = monitor.applyMonitor();
+    
+    std::this_thread::sleep_for(3s);
+    TS_ASSERT_THROWS_NOTHING(monitor.loadCachedResult());
+  }
+
+  void testCachingNegative() {
+    DirMonitor monitor("..");
+    auto res = monitor.applyMonitor();
+    
+    std::this_thread::sleep_for(7s);
+    TS_ASSERT_THROWS_ANYTHING(monitor.loadCachedResult());
+  }
+
 };
