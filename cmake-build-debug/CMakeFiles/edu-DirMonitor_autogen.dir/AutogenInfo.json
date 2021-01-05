@@ -1,0 +1,95 @@
+{
+	"BUILD_DIR" : "/home/ghadd/Development/CPP/edu-DirMonitor/cmake-build-debug/edu-DirMonitor_autogen",
+	"CMAKE_BINARY_DIR" : "/home/ghadd/Development/CPP/edu-DirMonitor/cmake-build-debug",
+	"CMAKE_CURRENT_BINARY_DIR" : "/home/ghadd/Development/CPP/edu-DirMonitor/cmake-build-debug",
+	"CMAKE_CURRENT_SOURCE_DIR" : "/home/ghadd/Development/CPP/edu-DirMonitor",
+	"CMAKE_EXECUTABLE" : "/home/ghadd/Apps/clion-2020.2.1/bin/cmake/linux/bin/cmake",
+	"CMAKE_SOURCE_DIR" : "/home/ghadd/Development/CPP/edu-DirMonitor",
+	"DEP_FILE" : "",
+	"DEP_FILE_RULE_NAME" : "",
+	"HEADERS" : 
+	[
+		[
+			"/home/ghadd/Development/CPP/edu-DirMonitor/src/dirmonitor.h",
+			"MU",
+			"UVLADIE3JM/moc_dirmonitor.cpp"
+		],
+		[
+			"/home/ghadd/Development/CPP/edu-DirMonitor/src/server.h",
+			"MU",
+			"UVLADIE3JM/moc_server.cpp"
+		],
+		[
+			"/home/ghadd/Development/CPP/edu-DirMonitor/test/dirmonitor_test.h",
+			"MU",
+			"7HEK2XT3N7/moc_dirmonitor_test.cpp"
+		]
+	],
+	"HEADER_EXTENSIONS" : [ "h", "hh", "h++", "hm", "hpp", "hxx", "in", "txx" ],
+	"INCLUDE_DIR" : "/home/ghadd/Development/CPP/edu-DirMonitor/cmake-build-debug/edu-DirMonitor_autogen/include",
+	"MOC_COMPILATION_FILE" : "/home/ghadd/Development/CPP/edu-DirMonitor/cmake-build-debug/edu-DirMonitor_autogen/mocs_compilation.cpp",
+	"MOC_DEFINITIONS" : 
+	[
+		"JSON_USE_IMPLICIT_CONVERSIONS=1",
+		"QT_CORE_LIB",
+		"QT_GUI_LIB",
+		"QT_WIDGETS_LIB"
+	],
+	"MOC_DEPEND_FILTERS" : 
+	[
+		[
+			"Q_PLUGIN_METADATA",
+			"[\n][ \t]*Q_PLUGIN_METADATA[ \t]*\\([^\\)]*FILE[ \t]*\"([^\"]+)\""
+		]
+	],
+	"MOC_INCLUDES" : 
+	[
+		"/home/ghadd/Development/CPP/edu-DirMonitor/cmake-build-debug",
+		"/home/ghadd/Development/CPP/edu-DirMonitor",
+		"/usr/include/qt",
+		"/usr/include/qt/QtWidgets",
+		"/usr/include/qt/QtGui",
+		"/usr/include/qt/QtCore",
+		"/usr/lib/qt/mkspecs/linux-g++",
+		"/usr/local/include",
+		"/usr/include",
+		"/usr/include/c++/10.2.0",
+		"/usr/include/c++/10.2.0/x86_64-pc-linux-gnu",
+		"/usr/include/c++/10.2.0/backward",
+		"/usr/lib/gcc/x86_64-pc-linux-gnu/10.2.0/include",
+		"/usr/lib/gcc/x86_64-pc-linux-gnu/10.2.0/include-fixed"
+	],
+	"MOC_MACRO_NAMES" : [ "Q_OBJECT", "Q_GADGET", "Q_NAMESPACE", "Q_NAMESPACE_EXPORT" ],
+	"MOC_OPTIONS" : [],
+	"MOC_PATH_PREFIX" : true,
+	"MOC_PREDEFS_CMD" : 
+	[
+		"/usr/bin/c++",
+		"-dM",
+		"-E",
+		"-c",
+		"/home/ghadd/Apps/clion-2020.2.1/bin/cmake/linux/share/cmake-3.17/Modules/CMakeCXXCompilerABI.cpp"
+	],
+	"MOC_PREDEFS_FILE" : "/home/ghadd/Development/CPP/edu-DirMonitor/cmake-build-debug/edu-DirMonitor_autogen/moc_predefs.h",
+	"MOC_RELAXED_MODE" : false,
+	"MOC_SKIP" : [],
+	"MULTI_CONFIG" : false,
+	"PARALLEL" : 2,
+	"PARSE_CACHE_FILE" : "/home/ghadd/Development/CPP/edu-DirMonitor/cmake-build-debug/CMakeFiles/edu-DirMonitor_autogen.dir/ParseCache.txt",
+	"QT_MOC_EXECUTABLE" : "/usr/bin/moc",
+	"QT_UIC_EXECUTABLE" : "/usr/bin/uic",
+	"QT_VERSION_MAJOR" : 5,
+	"QT_VERSION_MINOR" : 15,
+	"SETTINGS_FILE" : "/home/ghadd/Development/CPP/edu-DirMonitor/cmake-build-debug/CMakeFiles/edu-DirMonitor_autogen.dir/AutogenUsed.txt",
+	"SOURCES" : 
+	[
+		[ "/home/ghadd/Development/CPP/edu-DirMonitor/main.cpp", "MU" ],
+		[ "/home/ghadd/Development/CPP/edu-DirMonitor/src/dirmonitor.cpp", "MU" ],
+		[ "/home/ghadd/Development/CPP/edu-DirMonitor/src/server.cpp", "MU" ]
+	],
+	"UIC_OPTIONS" : [],
+	"UIC_SEARCH_PATHS" : [],
+	"UIC_SKIP" : [],
+	"UIC_UI_FILES" : [],
+	"VERBOSITY" : 0
+}

@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/ghadd/Development/CPP/edu-DirMonitor/src/server.cpp
+server.h
+/home/ghadd/Development/CPP/edu-DirMonitor/src/server.h
+
+/home/ghadd/Development/CPP/edu-DirMonitor/src/server.h
+iostream
+-
+netinet/in.h
+-
+sys/socket.h
+-
+unistd.h
+-
+

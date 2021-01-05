@@ -16,18 +16,16 @@ find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
 
 add_executable(edu-DirMonitor
-  main.cpp
-  app.cpp
-  app.h
-  app.ui
+        main.cpp
 
-  assets.qrc
+        src/dirmonitor.h
+        src/dirmonitor.cpp
 
-  src/dirmonitor.h
-  src/dirmonitor.cpp
+        src/server.h
+        src/server.cpp
 
-  test/dirmonitor_test.h
-  )
+        test/dirmonitor_test.h
+        )
 
 find_path(HIREDIS_HEADER hiredis)
 find_library(HIREDIS_LIB hiredis)

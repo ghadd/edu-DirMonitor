@@ -1,25 +1,8 @@
-#include "app.h"
-
-#include "src/dirmonitor.h"
-#include <QApplication>
-
-#define TEST
-
-#ifndef TEST
-
-int main(int argc, char *argv[]) {
-  QApplication a(argc, argv);
-  App w;
-  w.show();
-  return a.exec();
-}
-
-#else
+#include "src/server.h"
 
 int main() {
-  DirMonitor d("../edu-DirMonitor");
-  auto res = d.applyMonitor();
-  res = d.applyMonitor();
-}
+    Server server(9999);
+    server.setupThis();
 
-#endif
+    return server.run();
+}
