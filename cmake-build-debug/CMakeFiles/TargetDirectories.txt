@@ -1,4 +1,0 @@
-/home/ghadd/Development/CPP/edu-DirMonitor/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/ghadd/Development/CPP/edu-DirMonitor/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/ghadd/Development/CPP/edu-DirMonitor/cmake-build-debug/CMakeFiles/edu-DirMonitor.dir
-/home/ghadd/Development/CPP/edu-DirMonitor/cmake-build-debug/CMakeFiles/edu-DirMonitor_autogen.dir
