@@ -13,65 +13,70 @@
 
 #include "sw/redis++/redis++.h"
 #include <nlohmann/json.hpp>
+#include <utility>
 
 using namespace std::chrono_literals;
 using namespace sw::redis;
 using nlohmann::json;
 
 struct FileInfo {
-  QString filename;
-  QDateTime creationDate;
-  qint64 fileSize;
+    QString filename;
+    QDateTime creationDate;
+    qint64 fileSize;
 
-  json to_json() const {
-      json jsonObj = {
-          { "filename", filename.toStdString() },
-          { "creation_date", creationDate.toString(Qt::ISODate).toStdString() },
-          { "file_size", fileSize }
-      };
-      return jsonObj;
-  }
+    json to_json() const {
+        json jsonObj = {
+                {"filename",      filename.toStdString()},
+                {"creation_date", creationDate.toString(Qt::ISODate).toStdString()},
+                {"file_size",     fileSize}
+        };
+        return jsonObj;
+    }
 
-  static FileInfo from_json(const json &jsonObj) {
-      FileInfo res;
+    static FileInfo from_json(const json &jsonObj) {
+        FileInfo res;
 
-      std::string filename, creationDate;
-      jsonObj["filename"].get_to<std::string>(filename),
-      jsonObj["creation_date"].get_to<std::string>(creationDate),
-      jsonObj["file_size"].get_to<qint64>(res.fileSize);
+        std::string filename, creationDate;
+        jsonObj["filename"].get_to<std::string>(filename),
+                jsonObj["creation_date"].get_to<std::string>(creationDate),
+                jsonObj["file_size"].get_to<qint64>(res.fileSize);
 
-      res.filename = QString::fromStdString(filename);
-      res.creationDate = QDateTime::fromString(QString::fromStdString(creationDate), Qt::ISODate);
+        res.filename = QString::fromStdString(filename);
+        res.creationDate = QDateTime::fromString(QString::fromStdString(creationDate), Qt::ISODate);
 
-      return res;
-  }
+        return res;
+    }
 };
 
 class DirMonitor {
 public:
-  static Redis redis;
+    static Redis redis;
 
-  explicit DirMonitor(const QDir &dir) : monitoringDir_(dir){};
-  explicit DirMonitor(const QString &dirPath) : monitoringDir_(QDir(dirPath)){};
+    explicit DirMonitor(const QDir &dir, QStringList fileExtensions = QStringList())
+        : monitoringDir_(dir), fileExtensions_(std::move(fileExtensions)) {};
 
-  QPair<QVector<FileInfo>, quint64> applyMonitor();
+    explicit DirMonitor(const QString &dirPath, QStringList fileExtensions = QStringList())
+        : monitoringDir_(QDir(dirPath)), fileExtensions_(std::move(fileExtensions)) {};
 
-  void validatePath() const;
+    QPair<QVector<FileInfo>, quint64> applyMonitor();
 
-  void saveExpiring() const;
+    void validatePath() const;
 
-  static json jsonify(const QPair<QVector<FileInfo>, quint64> &obj);
+    void saveExpiring() const;
 
-  void loadCachedResult();
+    static json jsonify(const QPair<QVector<FileInfo>, quint64> &obj);
+
+    void loadCachedResult();
 
 private:
-  QDir monitoringDir_;
-  QPair<QVector<FileInfo>, quint64> lastResult_;
+    QDir monitoringDir_;
+    QStringList fileExtensions_;
+    QPair<QVector<FileInfo>, quint64> lastResult_;
 };
 
 class PathError : public QException {
 public:
-  void raise() const override { throw *this; }
+    void raise() const override { throw *this; }
 };
 
 #endif // DIRMONITOR_H
