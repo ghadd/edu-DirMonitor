@@ -1,19 +1,21 @@
 #include "server.h"
 
+// set base setting of server(create socket, bind him and listen)
 void Server::setupThis() {
 
     // Create a socket (IPv4, TCP)
     listenfd_ = socket(AF_INET, SOCK_STREAM, 0);
+
     if (listenfd_ == -1) {
         throw std::runtime_error("Failed to create socket. errno: ");
     }
 
     // Listen to port on any address
-    servAddr_.sin_family = AF_INET;
+    servAddr_.sin_family = AF_INET; // set IPv4
     servAddr_.sin_addr.s_addr = INADDR_ANY;
     servAddr_.sin_port = htons(port_); // htons is necessary to convert a number
 
-    // to network byte order
+    // bind socket to specific address
     if (bind(listenfd_, (sockaddr *) &servAddr_, sizeof(sockaddr)) < 0) {
         throw std::runtime_error("Failed to bind to port {}. errno: {}");
     }
@@ -23,6 +25,7 @@ void Server::setupThis() {
     }
 }
 
+// wrapper for handleClient to use in thread
 void *Server::handleClientWrapper(void *args)
 {
     auto data = *static_cast<QPair<Server *, client_t *> *>(args);
@@ -31,51 +34,73 @@ void *Server::handleClientWrapper(void *args)
     return nullptr;
 }
 
+// handle client request
 void Server::handleClient(client_t *client) {
 
-    std::cout << "Connected: ";
-
     /* TOLOG
+    std::cout << "Connected: ";
     getClientAddress(client->address);
     */
 
     char *buffer = new char[BUFFER_SZ];
+
+    // read path to directory and extentions of files that are in this directory
     read(client->sockfd, buffer, BUFFER_SZ);
+
+    /* TOLOG
     std::cout << "\nThe message was: " << buffer << std::endl;
+    */
+
     QString buff(buffer);
     delete []buffer;
 
+    // get list, where first argument is path ; second is extentions of files
     QStringList pathAndFormats = buff.split(QRegExp("\n"));
+    if(pathAndFormats.isEmpty()) {
+        throw std::runtime_error("Path to directory isn't enter");
+    }
 
     // get path to directory
     QString path = pathAndFormats[0].trimmed();
+
+    /* TOLOG
     std::cout << "\nPath: " << path.toStdString() << std::endl;
+    */
 
     // get extentions of files in directory
+    if(pathAndFormats[1].isEmpty()) {
+        throw std::runtime_error("Extentions of files isn't enter");
+    }
+
     QString formatsString = pathAndFormats[1];
     QStringList formats = formatsString.split(QRegExp(" | "));
-    if (formatsString.isEmpty()) formats = QStringList();
-    std::cout << "\nFormats: ";
 
+    /* TOLOG
+    std::cout << "\nFormats: ";
     for(auto &format : formats)
         std::cout << format.trimmed().toStdString() << ", " << std::endl;
+    */
 
+    // get info about files of formats(second argument) from path or directory(first argument)
     DirMonitor monitor(path, formats);
+
+    // check if path and formats of files are valid
     monitor.validatePath();
 
+    // send response
     std::string response = DirMonitor::jsonify(monitor.applyMonitor()).dump();
-
     send(client->sockfd, response.c_str(), response.size(), 0);
 
     close(client->sockfd);
-
     free(client);
 
+    // decrease number of client that are served by server
     pthread_mutex_lock(&mutex);
     clientCount--;
     pthread_mutex_unlock(&mutex);
 }
 
+// get IP of client
 void Server::getClientAddress(struct sockaddr_in& addr) {
     printf("%d.%d.%d.%d",
         addr.sin_addr.s_addr & 0xff,
@@ -84,6 +109,7 @@ void Server::getClientAddress(struct sockaddr_in& addr) {
         (addr.sin_addr.s_addr >> 24) & 0xff);
 }
 
+// run server
 int Server::run() {
     /* TODO:
      * 1. Implement the whole transaction functionality
@@ -99,10 +125,6 @@ int Server::run() {
 
     printf("=== SERVER START WORKING ===\n");
 
-    // keep all handles of threads
-    QVector<pthread_t*> handlesThread;
-
-
     while ((connfd = accept(listenfd_, (struct sockaddr *) &clientAddr, &clientAddrLen)) > 0) {
         if((clientCount + 1) == maxConnections){
             printf("Max clients reached. Rejected: ");
@@ -117,8 +139,8 @@ int Server::run() {
 
         // client settings
         client_t *cli = new client_t;
-        cli->address = clientAddr;
-        cli->sockfd = connfd;
+        cli->address = clientAddr; // set address if client
+        cli->sockfd = connfd; // set socket number of client
 
         // descriptor of thread
         pthread_t threadHandle;
@@ -127,13 +149,18 @@ int Server::run() {
         // handle each client
         pthread_create(&threadHandle, NULL, &handleClientWrapper, static_cast<void *>(&data));
 
+
         handlesThread.push_back(&threadHandle);
     }
-
-    for(int i = 0; i < handlesThread.size(); i++)
-        delete handlesThread[i];
 
     close(listenfd_);
 
     return 0;
+}
+
+Server::~Server()
+{
+    for(int i = 0; i < handlesThread.size(); i++)
+        delete handlesThread[i];
+    close(listenfd_);
 };
