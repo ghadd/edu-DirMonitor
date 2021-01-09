@@ -11,26 +11,28 @@
 #include <QVector>
 #include <QRegExp>
 #include <QStringList>
+#include <QPair>
 
-#define BUFFER_SZ 2048
+#define BUFFER_SZ (1 << 10)
+
+struct client_t{
+    struct sockaddr_in address;
+    int sockfd;
+};
+
 
 class Server {
 public:
 
     explicit Server(int port) : port_(port) { pthread_mutex_init(&mutex, 0); }
     void setupThis();
-    void *handleClient(void *client);
+
+    static void *handleClientWrapper(void *args);
+    void handleClient(client_t *client);
     void getClientAddress(struct sockaddr_in& addr);
     int run();
 
 private:
-    /* Client structure */
-    typedef struct{
-        struct sockaddr_in address;
-        int sockfd;
-    } client_t;
-
-
     int listenfd_{};
 
     int port_;

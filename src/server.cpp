@@ -23,17 +23,27 @@ void Server::setupThis() {
     }
 }
 
-void* Server::handleClient(void *client) {
-    pthread_mutex_lock(&mutex);
+void *Server::handleClientWrapper(void *args)
+{
+    auto data = *static_cast<QPair<Server *, client_t *> *>(args);
+    data.first->handleClient(data.second);
 
-    client_t *cli = (client_t *)client;
+    return nullptr;
+}
+
+void Server::handleClient(client_t *client) {
 
     std::cout << "Connected: ";
-    getClientAddress(cli->address);
-    char buffer[BUFFER_SZ];
-    read(cli->sockfd, buffer, BUFFER_SZ);
+
+    /* TOLOG
+    getClientAddress(client->address);
+    */
+
+    char *buffer = new char[BUFFER_SZ];
+    read(client->sockfd, buffer, BUFFER_SZ);
     std::cout << "\nThe message was: " << buffer << std::endl;
     QString buff(buffer);
+    delete []buffer;
 
     QStringList pathAndFormats = buff.split(QRegExp("\n"));
 
@@ -43,26 +53,27 @@ void* Server::handleClient(void *client) {
 
     // get extentions of files in directory
     QString formatsString = pathAndFormats[1];
-    QStringList formats = formatsString.split(QRegExp("|"));
+    QStringList formats = formatsString.split(QRegExp(" | "));
+    if (formatsString.isEmpty()) formats = QStringList();
     std::cout << "\nFormats: ";
-    for(auto format : formats) std::cout << format.trimmed().toStdString() << ", " << std::endl;
+
+    for(auto &format : formats)
+        std::cout << format.trimmed().toStdString() << ", " << std::endl;
 
     DirMonitor monitor(path, formats);
     monitor.validatePath();
 
     std::string response = DirMonitor::jsonify(monitor.applyMonitor()).dump();
 
-    send(cli->sockfd, response.c_str(), response.size(), 0);
+    send(client->sockfd, response.c_str(), response.size(), 0);
 
-    close(cli->sockfd);
+    close(client->sockfd);
 
     free(client);
 
+    pthread_mutex_lock(&mutex);
     clientCount--;
-
     pthread_mutex_unlock(&mutex);
-
-    return nullptr;
 }
 
 void Server::getClientAddress(struct sockaddr_in& addr) {
@@ -112,12 +123,11 @@ int Server::run() {
         // descriptor of thread
         pthread_t threadHandle;
 
+        auto data = qMakePair(this, cli);
         // handle each client
-        pthread_create(&threadHandle, NULL, handleClient, (void *)cli);
-
+        pthread_create(&threadHandle, NULL, &handleClientWrapper, static_cast<void *>(&data));
 
         handlesThread.push_back(&threadHandle);
-
     }
 
     for(int i = 0; i < handlesThread.size(); i++)
