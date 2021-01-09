@@ -1,0 +1,45 @@
+language: cpp
+compiler: gcc
+os: linux
+
+matrix:
+  include:
+    - os: linux
+      compiler: gcc
+      addons:
+       apt:
+         packages: &precise_latest_boost_packages
+           - gcc-4.8
+           - g++-4.8
+    
+before_install:
+  - git clone https://github.com/redis/hiredis.git
+  - cd hiredis
+  - make
+  - make install
+  - cd ..
+  
+  - git clone https://github.com/sewenew/redis-plus-plus.git
+  - cd redis-plus-plus  
+  - mkdir compile  
+  - cd compile  
+  - cmake -DCMAKE_BUILD_TYPE=Release ..  
+  - make  
+  - make install  
+
+  - apt-get install nlohmann-json3-dev
+
+script:
+    ############################################################################
+    # Build main and tests
+    ############################################################################
+    - cd test
+    - mkdir build && cd build
+    - cmake ..
+    - cmake --build . 
+    - ./edu-DirMonitor-Test
+    
+    - cd ../..
+    - mkdir build && cd build
+    - cmake .. 
+    - cmake --build .
