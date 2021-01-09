@@ -35,7 +35,7 @@ before_install:
   - sudo apt-get -qq update
 
 install:
-  - sudo apt-get --yes install qt55base qt55imageformats qt55svg
+  - sudo apt-get --yes install qt55base qt55imageformats qt55svg sudo apt-get nlohmann-json-dev
 
 before_script:
   # Qt variables
