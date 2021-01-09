@@ -2,37 +2,75 @@
 
 void Server::setupThis() {
 
-// Create a socket (IPv4, TCP)
-    sockfd_ = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd_ == -1) {
+    // Create a socket (IPv4, TCP)
+    listenfd_ = socket(AF_INET, SOCK_STREAM, 0);
+    if (listenfd_ == -1) {
         throw std::runtime_error("Failed to create socket. errno: ");
     }
 
-// Listen to port on any address
-    sockaddr_.sin_family = AF_INET;
-    sockaddr_.sin_addr.s_addr = INADDR_ANY;
-    sockaddr_.sin_port = htons(port_); // htons is necessary to convert a number
-// to network byte order
+    // Listen to port on any address
+    servAddr_.sin_family = AF_INET;
+    servAddr_.sin_addr.s_addr = INADDR_ANY;
+    servAddr_.sin_port = htons(port_); // htons is necessary to convert a number
 
-    if (bind(sockfd_, (sockaddr *) &sockaddr_, sizeof(sockaddr)) < 0) {
+    // to network byte order
+    if (bind(listenfd_, (sockaddr *) &servAddr_, sizeof(sockaddr)) < 0) {
         throw std::runtime_error("Failed to bind to port {}. errno: {}");
     }
 
-    if (listen(sockfd_, maxConnections) < 0) {
+    if (listen(listenfd_, maxConnections) < 0) {
         throw std::runtime_error("Failed to listen on socket. errno: {}");
     }
 }
 
-void *Server::processRequest(void *requestData) {
-    /* TODO
-     * 1. Parse request data
-     * 2. Call DirMonitor
-     * 3. Dump a response
-     * 4. Return a response data
-     */
-    free(requestData);
+void* Server::handleClient(void *client) {
+    pthread_mutex_lock(&mutex);
+
+    client_t *cli = (client_t *)client;
+
+    std::cout << "Connected: ";
+    getClientAddress(cli->address);
+    char buffer[BUFFER_SZ];
+    read(cli->sockfd, buffer, BUFFER_SZ);
+    std::cout << "\nThe message was: " << buffer << std::endl;
+    QString buff(buffer);
+
+    QStringList pathAndFormats = buff.split(QRegExp("\n"));
+
+    // get path to directory
+    QString path = pathAndFormats[0].trimmed();
+    std::cout << "\nPath: " << path.toStdString() << std::endl;
+
+    // get extentions of files in directory
+    QString formatsString = pathAndFormats[1];
+    QStringList formats = formatsString.split(QRegExp("|"));
+    std::cout << "\nFormats: ";
+    for(auto format : formats) std::cout << format.trimmed().toStdString() << ", " << std::endl;
+
+    DirMonitor monitor(path, formats);
+    monitor.validatePath();
+
+    std::string response = DirMonitor::jsonify(monitor.applyMonitor()).dump();
+
+    send(cli->sockfd, response.c_str(), response.size(), 0);
+
+    close(cli->sockfd);
+
+    free(client);
+
+    clientCount--;
+
+    pthread_mutex_unlock(&mutex);
 
     return nullptr;
+}
+
+void Server::getClientAddress(struct sockaddr_in& addr) {
+    printf("%d.%d.%d.%d",
+        addr.sin_addr.s_addr & 0xff,
+        (addr.sin_addr.s_addr >> 8) & 0xff,
+        (addr.sin_addr.s_addr >> 16) & 0xff,
+        (addr.sin_addr.s_addr >> 24) & 0xff);
 }
 
 int Server::run() {
@@ -40,22 +78,52 @@ int Server::run() {
      * 1. Implement the whole transaction functionality
      * 2. Implement logging
      */
-    sockaddrlen_ = sizeof(sockaddr_);
-    int conn;
-    while ((conn = accept(sockfd_, (struct sockaddr *) &sockaddr_, &sockaddrlen_)) > 0) {
-        // This region is gotta be replaced
-        char buffer[100];
-        read(conn, buffer, 100);
-        std::cout << "The message was: " << buffer << std::endl;
 
-        std::string response = "Good talking to you\n";
-        send(conn, response.c_str(), response.size(), 0);
+    // client socket
+    int connfd;
 
-        close(conn);
-        // end of region
+    // client socket addr
+    sockaddr_in clientAddr{};
+    socklen_t clientAddrLen = sizeof (clientAddr);
+
+    printf("=== SERVER START WORKING ===\n");
+
+    // keep all handles of threads
+    QVector<pthread_t*> handlesThread;
+
+
+    while ((connfd = accept(listenfd_, (struct sockaddr *) &clientAddr, &clientAddrLen)) > 0) {
+        if((clientCount + 1) == maxConnections){
+            printf("Max clients reached. Rejected: ");
+            getClientAddress(clientAddr);
+            printf(":%d\n", clientAddr.sin_port);
+            close(connfd);
+            continue;
+        }
+
+        // increase number of clients that are served by server
+        clientCount++;
+
+        // client settings
+        client_t *cli = new client_t;
+        cli->address = clientAddr;
+        cli->sockfd = connfd;
+
+        // descriptor of thread
+        pthread_t threadHandle;
+
+        // handle each client
+        pthread_create(&threadHandle, NULL, handleClient, (void *)cli);
+
+
+        handlesThread.push_back(&threadHandle);
+
     }
 
-    close(sockfd_);
+    for(int i = 0; i < handlesThread.size(); i++)
+        delete handlesThread[i];
+
+    close(listenfd_);
 
     return 0;
 };
