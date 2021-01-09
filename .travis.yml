@@ -15,7 +15,13 @@ matrix:
            - gcc-4.8
            - g++-4.8
     
-before_install:
+before_install: 
+  - sudo apt-add-repository --yes ppa:beineri/opt-qt551-trusty
+  - sudo apt-get -qq update
+
+install:
+  - sudo apt-get --yes install qt55base qt55imageformats qt55svg sudo apt-get nlohmann-json-dev
+
   - cd ..
   - git clone https://github.com/redis/hiredis.git
   - cd hiredis
@@ -29,13 +35,7 @@ before_install:
   - cd compile  
   - cmake -DCMAKE_BUILD_TYPE=Release ..  
   - make  
-  - sudo make install  
-
-  - sudo apt-add-repository --yes ppa:beineri/opt-qt551-trusty
-  - sudo apt-get -qq update
-
-install:
-  - sudo apt-get --yes install qt55base qt55imageformats qt55svg sudo apt-get nlohmann-json-dev
+  - sudo make install 
 
 before_script:
   # Qt variables
