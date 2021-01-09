@@ -16,6 +16,7 @@ matrix:
            - g++-4.8
     
 before_install:
+  - cd ..
   - git clone https://github.com/redis/hiredis.git
   - cd hiredis
   - make
@@ -29,6 +30,7 @@ before_install:
   - cmake -DCMAKE_BUILD_TYPE=Release ..  
   - make  
   - sudo make install  
+  - cd ../../edu-DirMonitor
 
 script:
     ############################################################################
