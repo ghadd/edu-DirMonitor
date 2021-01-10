@@ -25,10 +25,11 @@ before_install:
   - sudo apt-get install dpkg
 
 install:
-  - sudo apt-get --yes install qt55base qt55imageformats qt55svg nlohmann-json
+  - sudo apt-get update -y
+  - sudo apt-get --yes install qt55base qt55imageformats qt55svg nlohmann-json3 cxxtest
   # - wget http://ports.ubuntu.com/pool/universe/n/nlohmann-json/nlohmann-json-dev_2.1.1-1.1_all.deb
   # - sudo dpkg -i nlohmann-json-dev_2.1.1-1.1_all.deb
-    
+
   - cd ..
   - git clone https://github.com/redis/hiredis.git
   - cd hiredis
