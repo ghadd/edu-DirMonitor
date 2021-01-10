@@ -1,5 +1,7 @@
 # Directory monitor
 
+[![Build Status](https://travis-ci.com/ghadd/edu-DirMonitor.svg?branch=develop)](https://travis-ci.org/ghadd/edu-DirMonitor)
+
 ## Installation
 
 ```bash
@@ -10,7 +12,7 @@ $ cmake ..
 $ cmake --build .
 $ ./edu-DirMonitor
 
-window pops up
+=== Server is running ===
 ```
 
 ## Running Tests
@@ -22,5 +24,5 @@ $ cmake ..
 $ cmake --build .
 $ ./edu-DirMonitor-Test
 
-Running cxxtest tests (2 tests)..OK!
+Running cxxtest tests (5 tests)..OK!
 ```

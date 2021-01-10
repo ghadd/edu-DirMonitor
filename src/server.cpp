@@ -110,7 +110,6 @@ void Server::handleClient(client_t *client) {
         // send response
         send(client->sockfd, response.c_str(), response.size(), 0);
     }
-
     delete []buffer;
     delete client;
 
