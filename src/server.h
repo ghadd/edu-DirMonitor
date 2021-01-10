@@ -23,30 +23,54 @@ struct client_t{
 
 class Server {
 public:
-
+    // set mutex and port to listen by server
     explicit Server(int port) : port_(port) { pthread_mutex_init(&mutex, 0); }
+
+    // set base setting of server(create socket, bind him and listen)
     void setupThis();
 
-    static void *handleClientWrapper(void *args);
-    void handleClient(client_t *client);
-    void getClientAddress(struct sockaddr_in& addr);
+    // start server
     int run();
 
-protected:
-    std::string generateResponse(QString buff);
+    ~Server();
 
 private:
+    /* private methods */
+    // wrapper for handleClient to use in thread
+    static void *handleClientWrapper(void *args);
+
+    // get data that need client and send him
+    void handleClient(client_t *client);
+
+    // get client adrees
+    void getClientAddress(struct sockaddr_in& addr);
+
+    // add
+    std::string generateResponse(QString buff);
+
+
+    /* private variables */
+    // socket descriptor
     int listenfd_{};
 
+    // port to listen
     int port_;
 
+    // server address
     sockaddr_in servAddr_{};
     socklen_t servAddrLen_{};
 
+    // number of clients that are served by server
     unsigned int clientCount;
+
+    // max connection of clients to server
     const unsigned int maxConnections = 10;
 
     pthread_mutex_t mutex;
+
+    // save all descriptors of threads that are used by clients to delete in the end
+    QVector<pthread_t*> handlesThread;
+
 };
 
 #endif
