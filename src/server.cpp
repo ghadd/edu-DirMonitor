@@ -36,7 +36,7 @@ void *Server::handleClientWrapper(void *args)
 
 // handle errors and send response about the, to the client
 std::string Server::handleError(std::string error) {
-    json responseError = {{"status", false}, {"response", error}};
+    json responseError = {{"status", false}, {"reason", error}};
     return responseError.dump();
 }
 
@@ -60,6 +60,9 @@ std::string Server::generateResponse(QString buff)
     if(pathAndFormats.size() > 1) {
         QString formatsString = pathAndFormats[1];
         formats = formatsString.split(QRegExp(" | "));
+        if (formats.at(0).isEmpty()) {
+            formats = QStringList();
+        }
     }
 
     /* TOLOG
@@ -74,13 +77,19 @@ std::string Server::generateResponse(QString buff)
     // check if path and formats of files are valid
     try{
         monitor.validatePath();
-    } catch (const std::runtime_error& error) {
-        response = handleError("You don't enter valid path, change it please."); // responseError.dump();
+    } catch (const PathError &e) {
+        response = handleError("You didn't enter valid path, change it please."); // responseError.dump();
         return response;
     }
 
     // if NO ERROR -> get files info from specific directory to send them to client
-    auto responseJson = DirMonitor::jsonify(monitor.applyMonitor());
+    auto responseData = monitor.applyMonitor();
+    if (responseData.first.size() == 0) {
+        response = handleError("No files mathing given extensions found.");
+        return response;
+    }
+
+    auto responseJson = DirMonitor::jsonify(responseData);
     responseJson["status"] = true;
     response = responseJson.dump();
     return response;

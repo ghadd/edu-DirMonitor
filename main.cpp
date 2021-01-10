@@ -2,7 +2,7 @@
 
 int main() {
     try {
-        Server server(9994);
+        Server server(9998);
         server.setupThis();
 
         return server.run();
@@ -10,5 +10,6 @@ int main() {
         /*
          * TODO EXCEPTION
          */
+        throw;
     }
 }
