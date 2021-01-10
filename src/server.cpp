@@ -67,7 +67,7 @@ void Server::handleClient(client_t *client) {
 
     send(client->sockfd, response.c_str(), response.size(), 0);
 
-    close(client->sockfd);
+    // close(client->sockfd);
 
     free(client);
 
