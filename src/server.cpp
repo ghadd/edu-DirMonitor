@@ -34,14 +34,19 @@ void *Server::handleClientWrapper(void *args)
     return nullptr;
 }
 
+// handle errors and send response about the, to the client
+std::string Server::handleError(std::string error) {
+    json responseError = {{"status", false}, {"response", error}};
+    return responseError.dump();
+}
+
 // get files info from specific directory to send them to client
 std::string Server::generateResponse(QString buff)
 {
+    std::string response;
+
     // get list, where first argument is path ; second is extentions of files
     QStringList pathAndFormats = buff.split(QRegExp("\n"));
-    if(pathAndFormats.isEmpty()) {
-        throw std::runtime_error("Path to directory isn't enter");
-    }
 
     // get path to directory
     QString path = pathAndFormats[0].trimmed();
@@ -50,14 +55,12 @@ std::string Server::generateResponse(QString buff)
     std::cout << "\nPath: " << path.toStdString() << std::endl;
     */
 
-    // get extentions of files in directory
-    if(pathAndFormats[1].isEmpty()) {
-        throw std::runtime_error("Extentions of files isn't enter");
+    QStringList formats = QStringList();
+    // check if client enter formats
+    if(pathAndFormats.size() > 1) {
+        QString formatsString = pathAndFormats[1];
+        formats = formatsString.split(QRegExp(" | "));
     }
-
-    QString formatsString = pathAndFormats[1];
-    QStringList formats = formatsString.split(QRegExp(" | "));
-
 
     /* TOLOG
     std::cout << "\nFormats: ";
@@ -69,11 +72,17 @@ std::string Server::generateResponse(QString buff)
     DirMonitor monitor(path, formats);
 
     // check if path and formats of files are valid
-    monitor.validatePath();
+    try{
+        monitor.validatePath();
+    } catch (const std::runtime_error& error) {
+        response = handleError("You don't enter valid path, change it please."); // responseError.dump();
+        return response;
+    }
 
-    // get files info from specific directory to send them to client
-    std::string response = DirMonitor::jsonify(monitor.applyMonitor()).dump();
-
+    // if NO ERROR -> get files info from specific directory to send them to client
+    auto responseJson = DirMonitor::jsonify(monitor.applyMonitor());
+    responseJson["status"] = true;
+    response = responseJson.dump();
     return response;
 }
 

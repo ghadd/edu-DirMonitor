@@ -1,8 +1,14 @@
 #include "src/server.h"
 
 int main() {
-    Server server(9994);
-    server.setupThis();
+    try {
+        Server server(9994);
+        server.setupThis();
 
-    return server.run();
+        return server.run();
+    }  catch (const std::runtime_error& error) {
+        /*
+         * TODO EXCEPTION
+         */
+    }
 }
