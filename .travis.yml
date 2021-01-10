@@ -2,6 +2,9 @@ language: cpp
 compiler: gcc
 os: linux
 
+dist: bionic
+sudo: required
+
 matrix:
   include:
     - os: linux
@@ -12,11 +15,18 @@ matrix:
            - gcc-4.8
            - g++-4.8
     
-before_install:
+before_install: 
+  - sudo apt-get update
+
+install:
+  - sudo apt-get update -y
+  - sudo apt-get --yes install qt5-default cxxtest
+
+  - cd ..
   - git clone https://github.com/redis/hiredis.git
   - cd hiredis
   - make
-  - make install
+  - sudo make install
   - cd ..
   
   - git clone https://github.com/sewenew/redis-plus-plus.git
@@ -25,21 +35,13 @@ before_install:
   - cd compile  
   - cmake -DCMAKE_BUILD_TYPE=Release ..  
   - make  
-  - make install  
-
-  - apt-get install nlohmann-json3-dev
+  - sudo make install 
 
 script:
     ############################################################################
     # Build main and tests
     ############################################################################
-    - cd test
-    - mkdir build && cd build
-    - cmake ..
-    - cmake --build . 
-    - ./edu-DirMonitor-Test
-    
-    - cd ../..
+    - cd ../../edu-DirMonitor
     - mkdir build && cd build
     - cmake .. 
     - cmake --build .
