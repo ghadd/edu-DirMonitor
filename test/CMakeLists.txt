@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.11)
+include(FetchContent)
 
 project(edu-DirMonitor-Test LANGUAGES CXX)
 
@@ -40,5 +41,17 @@ target_link_libraries(edu-DirMonitor-Test PRIVATE ${REDIS_PLUS_PLUS_LIB})
 
 find_package(nlohmann_json 3.2.0 REQUIRED)
 target_link_libraries(edu-DirMonitor-Test PRIVATE nlohmann_json::nlohmann_json)
+
+FetchContent_Declare(json
+  GIT_REPOSITORY https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent
+  GIT_TAG v3.9.1)
+
+FetchContent_GetProperties(json)
+if(NOT json_POPULATED)
+  FetchContent_Populate(json)
+  add_subdirectory(${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
+
+target_link_libraries(edu-DirMonitor PRIVATE nlohmann_json::nlohmann_json)
 
 target_link_libraries(edu-DirMonitor-Test PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
