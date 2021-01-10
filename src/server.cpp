@@ -34,26 +34,9 @@ void *Server::handleClientWrapper(void *args)
     return nullptr;
 }
 
-// handle client request
-void Server::handleClient(client_t *client) {
-
-    /* TOLOG
-    std::cout << "Connected: ";
-    getClientAddress(client->address);
-    */
-
-    char *buffer = new char[BUFFER_SZ];
-
-    // read path to directory and extentions of files that are in this directory
-    read(client->sockfd, buffer, BUFFER_SZ);
-
-    /* TOLOG
-    std::cout << "\nThe message was: " << buffer << std::endl;
-    */
-
-    QString buff(buffer);
-    delete []buffer;
-
+// get files info from specific directory to send them to client
+std::string Server::generateResponse(QString buff)
+{
     // get list, where first argument is path ; second is extentions of files
     QStringList pathAndFormats = buff.split(QRegExp("\n"));
     if(pathAndFormats.isEmpty()) {
@@ -75,6 +58,7 @@ void Server::handleClient(client_t *client) {
     QString formatsString = pathAndFormats[1];
     QStringList formats = formatsString.split(QRegExp(" | "));
 
+
     /* TOLOG
     std::cout << "\nFormats: ";
     for(auto &format : formats)
@@ -87,12 +71,48 @@ void Server::handleClient(client_t *client) {
     // check if path and formats of files are valid
     monitor.validatePath();
 
-    // send response
+    // get files info from specific directory to send them to client
     std::string response = DirMonitor::jsonify(monitor.applyMonitor()).dump();
-    send(client->sockfd, response.c_str(), response.size(), 0);
 
-    close(client->sockfd);
-    free(client);
+    return response;
+}
+
+// handle client request
+void Server::handleClient(client_t *client) {
+
+    /* TOLOG
+    std::cout << "Connected: ";
+    getClientAddress(client->address);
+    */
+
+    char *buffer = new char[BUFFER_SZ];
+
+    while (client) {
+        // read path to directory and extentions of files that are in this directory
+        read(client->sockfd, buffer, BUFFER_SZ);
+
+
+        /* TOLOG
+        std::cout << "\nThe message was: " << buffer << std::endl;
+        */
+
+        QString buff(buffer);
+
+        // if message from client starts with word '__close__' - close connection
+        if (buff.startsWith("__close__")) {
+            close(client->sockfd);
+            return;
+        }
+
+        // get files info from specific directory to send them to client
+        auto response = generateResponse(buff);
+
+        // send response
+        send(client->sockfd, response.c_str(), response.size(), 0);
+    }
+
+    delete []buffer;
+    delete client;
 
     // decrease number of client that are served by server
     pthread_mutex_lock(&mutex);

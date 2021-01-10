@@ -29,6 +29,13 @@ public:
     // set base setting of server(create socket, bind him and listen)
     void setupThis();
 
+    // start server
+    int run();
+
+    ~Server();
+
+private:
+    /* private methods */
     // wrapper for handleClient to use in thread
     static void *handleClientWrapper(void *args);
 
@@ -38,12 +45,11 @@ public:
     // get client adrees
     void getClientAddress(struct sockaddr_in& addr);
 
-    // start server
-    int run();
+    // add
+    std::string generateResponse(QString buff);
 
-    ~Server();
 
-private:
+    /* private variables */
     // socket descriptor
     int listenfd_{};
 
