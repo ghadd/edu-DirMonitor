@@ -45,9 +45,11 @@ private:
     // get client adrees
     void getClientAddress(struct sockaddr_in& addr);
 
-    // add
+    // get files info from specific directory to send them to client
     std::string generateResponse(QString buff);
 
+    // handle errors and send response about the, to the client
+    std::string handleError(std::string error);
 
     /* private variables */
     // socket descriptor
