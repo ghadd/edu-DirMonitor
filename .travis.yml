@@ -1,3 +1,5 @@
+# todo cxxtest and nlohmann json
+
 language: cpp
 compiler: gcc
 os: linux
@@ -15,7 +17,19 @@ matrix:
            - gcc-4.8
            - g++-4.8
     
-before_install:
+before_install: 
+  - sudo apt-add-repository --yes ppa:beineri/opt-qt551-trusty
+  - sudo apt-get -qq update
+  - sudo apt-get clean
+  - sudo apt-get update
+  - sudo apt-get install dpkg
+
+install:
+  - sudo apt-get --yes install qt55base qt55imageformats qt55svg
+  - wget http://ports.ubuntu.com/pool/universe/n/nlohmann-json/nlohmann-json-dev_2.1.1-1.1_all.deb
+  - sudo dpkg -i nlohmann-json-dev_2.1.1-1.1_all.deb
+    
+  - cd ..
   - git clone https://github.com/redis/hiredis.git
   - cd hiredis
   - make
@@ -28,16 +42,19 @@ before_install:
   - cd compile  
   - cmake -DCMAKE_BUILD_TYPE=Release ..  
   - make  
-  - sudo make install  
+  - sudo make install 
 
-  - sudo add-apt-repository ppa:team-xbmc/ppa -y
-  - sudo apt-get update
-  - sudo apt-get install nlohmann-json3-dev qt5-dev-tools
+before_script:
+  # Qt variables
+  - QTDIR="/opt/qt55"
+  - PATH="$QTDIR/bin:$PATH"
+  - source /opt/qt55/bin/qt55-env.sh
 
 script:
     ############################################################################
     # Build main and tests
     ############################################################################
+    - cd ../../edu-DirMonitor
     - cd test
     - mkdir build && cd build
     - cmake ..

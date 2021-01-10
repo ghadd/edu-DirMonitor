@@ -32,6 +32,9 @@ public:
     void getClientAddress(struct sockaddr_in& addr);
     int run();
 
+protected:
+    std::string generateResponse(QString buff);
+
 private:
     int listenfd_{};
 

@@ -31,20 +31,8 @@ void *Server::handleClientWrapper(void *args)
     return nullptr;
 }
 
-void Server::handleClient(client_t *client) {
-
-    std::cout << "Connected: ";
-
-    /* TOLOG
-    getClientAddress(client->address);
-    */
-
-    char *buffer = new char[BUFFER_SZ];
-    read(client->sockfd, buffer, BUFFER_SZ);
-    std::cout << "\nThe message was: " << buffer << std::endl;
-    QString buff(buffer);
-    delete []buffer;
-
+std::string Server::generateResponse(QString buff)
+{
     QStringList pathAndFormats = buff.split(QRegExp("\n"));
 
     // get path to directory
@@ -65,11 +53,34 @@ void Server::handleClient(client_t *client) {
 
     std::string response = DirMonitor::jsonify(monitor.applyMonitor()).dump();
 
-    send(client->sockfd, response.c_str(), response.size(), 0);
+    return response;
+}
 
-    close(client->sockfd);
+void Server::handleClient(client_t *client) {
 
-    free(client);
+    std::cout << "Connected: ";
+
+    /* TOLOG
+    getClientAddress(client->address);
+    */
+
+    char *buffer = new char[BUFFER_SZ];
+    while (client) {
+        read(client->sockfd, buffer, BUFFER_SZ);
+        std::cout << "\nThe message was: " << buffer << std::endl;
+        QString buff(buffer);
+
+        if (buff.startsWith("__close__")) {
+            close(client->sockfd);
+            return;
+        }
+
+        auto response = generateResponse(buff);
+
+        send(client->sockfd, response.c_str(), response.size(), 0);
+    }
+    delete []buffer;
+    delete client;
 
     pthread_mutex_lock(&mutex);
     clientCount--;
