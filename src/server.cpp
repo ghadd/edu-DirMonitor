@@ -123,13 +123,13 @@ void Server::handleClient(client_t *client) {
       return;
     } else if (buff.startsWith("__test__")) {
         std::string response = ((json){{"status", true}}.dump());
-        send(client->sockfd, response.c_str(), response.size(), 0);
+        sendMessage(client->sockfd, response);
     } else {
         // get files info from specific directory to send them to client
         auto response = generateResponse(buff);
 
         // send response
-        send(client->sockfd, response.c_str(), response.size(), 0);
+        sendMessage(client->sockfd, response);
     }
   }
 
@@ -151,6 +151,15 @@ void Server::getClientAddress(struct sockaddr_in &addr) {
 }
 
 // run server
+void Server::sendMessage(int connfd, std::string response)
+{
+    uint32_t len = htonl(response.size());
+    std::cout << "Sending message of length: " << response.size() << std::endl;
+
+    send(connfd, &len, sizeof(len), 0);
+    send(connfd, response.c_str(), response.length(), 0);
+}
+
 int Server::run() {
   /* TODO:
    * 1. Implement the whole transaction functionality
@@ -174,13 +183,13 @@ int Server::run() {
       printf(":%d\n", clientAddr.sin_port);
 
       std::string response = handleError("Server is overloaded, please, try again later");
-      send(connfd, response.c_str(), response.length(), 0);
+      sendMessage(connfd, response);
       close(connfd);
       continue;
     }
     else {
         std::string response = ((json){{"status", true}}).dump();
-        send(connfd, response.c_str(), response.length(), 0);
+        sendMessage(connfd, response);
     }
 
     // increase number of clients that are served by server
