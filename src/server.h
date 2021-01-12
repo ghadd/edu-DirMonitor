@@ -34,6 +34,8 @@ public:
 
     ~Server();
 
+    void sendMessage(int connfd, std::string response);
+
 private:
     /* private methods */
     // wrapper for handleClient to use in thread
