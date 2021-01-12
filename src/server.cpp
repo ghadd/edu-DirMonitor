@@ -107,6 +107,7 @@ void Server::handleClient(client_t *client) {
   char *buffer = new char[BUFFER_SZ];
 
   while (client) {
+    bzero(buffer, BUFFER_SZ);
     // read path to directory and extentions of files that are in this directory
     read(client->sockfd, buffer, BUFFER_SZ);
 
