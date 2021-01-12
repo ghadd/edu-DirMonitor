@@ -178,6 +178,10 @@ int Server::run() {
       close(connfd);
       continue;
     }
+    else {
+        std::string response = ((json){{"status", true}}).dump();
+        send(connfd, response.c_str(), response.length(), 0);
+    }
 
     // increase number of clients that are served by server
     clientCount++;
