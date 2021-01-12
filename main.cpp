@@ -1,8 +1,12 @@
 #include "src/server.h"
 
-int main() {
+int main(int argc, char *argv[]) {
+  if (argc < 2) {
+      std::cout << "Not enough arguments.";
+      exit(1);
+  }
   try {
-    Server server(9999);
+    Server server(QString(argv[1]).toUInt());
     server.setupThis();
 
     return server.run();

@@ -63,7 +63,7 @@ private:
     socklen_t servAddrLen_{};
 
     // number of clients that are served by server
-    unsigned int clientCount;
+    unsigned int clientCount = 0;
 
     // max connection of clients to server
     const unsigned int maxConnections = 10;

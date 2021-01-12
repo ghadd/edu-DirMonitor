@@ -5,7 +5,7 @@ include(FetchContent)
 project(edu-DirMonitor LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_CXX_FLAGS "-Wall -W -Werror -fPIC -pthread")
+set(CMAKE_CXX_FLAGS "-fPIC -pthread")
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)

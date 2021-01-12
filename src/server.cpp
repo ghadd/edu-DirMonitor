@@ -110,9 +110,9 @@ void Server::handleClient(client_t *client) {
     // read path to directory and extentions of files that are in this directory
     read(client->sockfd, buffer, BUFFER_SZ);
 
-    /* TOLOG
+//    /* TOLOG
     std::cout << "\nThe message was: " << buffer << std::endl;
-    */
+//    */
 
     QString buff(buffer);
 
@@ -120,13 +120,16 @@ void Server::handleClient(client_t *client) {
     if (buff.startsWith("__close__")) {
       close(client->sockfd);
       return;
+    } else if (buff.startsWith("__test__")) {
+        std::string response = ((json){{"status", true}}.dump());
+        send(client->sockfd, response.c_str(), response.size(), 0);
+    } else {
+        // get files info from specific directory to send them to client
+        auto response = generateResponse(buff);
+
+        // send response
+        send(client->sockfd, response.c_str(), response.size(), 0);
     }
-
-    // get files info from specific directory to send them to client
-    auto response = generateResponse(buff);
-
-    // send response
-    send(client->sockfd, response.c_str(), response.size(), 0);
   }
 
   delete[] buffer;
@@ -160,7 +163,7 @@ int Server::run() {
   sockaddr_in clientAddr{};
   socklen_t clientAddrLen = sizeof(clientAddr);
 
-  printf("=== SERVER START WORKING ===\n");
+  printf("=== SERVER STARTED WORKING ===\n");
 
   while ((connfd = accept(listenfd_, (struct sockaddr *)&clientAddr,
                           &clientAddrLen)) > 0) {
