@@ -172,6 +172,9 @@ int Server::run() {
       printf("Max clients reached. Rejected: ");
       getClientAddress(clientAddr);
       printf(":%d\n", clientAddr.sin_port);
+
+      std::string response = handleError("Server is overloaded, please, try again later");
+      send(connfd, response.c_str(), response.length(), 0);
       close(connfd);
       continue;
     }
