@@ -2,12 +2,15 @@
 
 // set base setting of server(create socket, bind him and listen)
 void Server::setupThis() {
-
   // Create a socket (IPv4, TCP)
+    server_logger = spdlog::get("server_logger");
+    server_warn_logger = spdlog::get("server_warn_logger");
+
   listenfd_ = socket(AF_INET, SOCK_STREAM, 0);
 
   if (listenfd_ == -1) {
     throw std::runtime_error("Failed to create socket. errno: ");
+
   }
 
   // Listen to port on any address
@@ -16,13 +19,19 @@ void Server::setupThis() {
   servAddr_.sin_port = htons(port_); // htons is necessary to convert a number
 
   // bind socket to specific address
+
   if (bind(listenfd_, (sockaddr *)&servAddr_, sizeof(sockaddr)) < 0) {
+      server_logger->error("Failed to bind to port");
     throw std::runtime_error("Failed to bind to port {}. errno: {}");
   }
 
   if (listen(listenfd_, maxConnections) < 0) {
+     server_logger->error("Failed to listen on socket");
     throw std::runtime_error("Failed to listen on socket. errno: {}");
   }
+
+
+
 }
 
 // wrapper for handleClient to use in thread
@@ -42,7 +51,7 @@ std::string Server::handleError(std::string error) {
 // get files info from specific directory to send them to client
 std::string Server::generateResponse(QString buff) {
   std::string response;
-
+   server_logger->debug("Generating response");
   // get list, where first argument is path ; second is extentions of files
   QStringList pathAndFormats = buff.split(QRegExp("\n"));
 
@@ -52,6 +61,8 @@ std::string Server::generateResponse(QString buff) {
   /* TOLOG
   std::cout << "\nPath: " << path.toStdString() << std::endl;
   */
+
+  server_logger->debug("Path: '{}'", path.toStdString());
 
   QStringList formats = QStringList();
   // check if client enter formats
@@ -64,10 +75,15 @@ std::string Server::generateResponse(QString buff) {
   }
 
   /* TOLOG
+
   std::cout << "\nFormats: ";
   for(auto &format : formats)
       std::cout << format.trimmed().toStdString() << ", " << std::endl;
   */
+
+  server_logger->info("Formats");
+  for(auto &format : formats)
+      server_logger->info("{},", format.trimmed().toStdString());
 
   // get info about files of formats(second argument) from path or
   // directory(first argument)
@@ -77,6 +93,7 @@ std::string Server::generateResponse(QString buff) {
   try {
     monitor.validatePath();
   } catch (const PathError &e) {
+     server_logger->warn("Invalid path given");
     response = handleError(
         "You didn't enter valid path, change it please."); // responseError.dump();
     return response;
@@ -98,11 +115,14 @@ std::string Server::generateResponse(QString buff) {
 
 // handle client request
 void Server::handleClient(client_t *client) {
+  server_logger->info("Client connected:");
+  getClientAddress(client->address);
 
   /* TOLOG
   std::cout << "Connected: ";
   getClientAddress(client->address);
   */
+
 
   char *buffer = new char[BUFFER_SZ];
 
@@ -112,8 +132,9 @@ void Server::handleClient(client_t *client) {
     read(client->sockfd, buffer, BUFFER_SZ);
 
 //    /* TOLOG
-    std::cout << "\nThe message was: " << buffer << std::endl;
+    //std::cout << "\nThe message was: " << buffer << std::endl;
 //    */
+    server_logger->debug("The message {} received", buffer);
 
     QString buff(buffer);
 
@@ -164,15 +185,19 @@ int Server::run() {
   sockaddr_in clientAddr{};
   socklen_t clientAddrLen = sizeof(clientAddr);
 
-  printf("=== SERVER STARTED WORKING ===\n");
+  server_logger->info("Server started working");
 
   while ((connfd = accept(listenfd_, (struct sockaddr *)&clientAddr,
                           &clientAddrLen)) > 0) {
     if ((clientCount + 1) == maxConnections) {
-      printf("Max clients reached. Rejected: ");
-      getClientAddress(clientAddr);
-      printf(":%d\n", clientAddr.sin_port);
 
+      server_logger->warn("Maximum number of clients reached. Rejected:");
+      getClientAddress(clientAddr);
+      //server_logger->info("Client's address: {}", clientAddr.sin_addr.s_addr);
+      server_logger->info("Client's port: {}", clientAddr.sin_port);
+      //printf(":%d\n", clientAddr.sin_port);
+
+      server_logger->debug("Server is overloaded");
       std::string response = handleError("Server is overloaded, please, try again later");
       send(connfd, response.c_str(), response.length(), 0);
       close(connfd);

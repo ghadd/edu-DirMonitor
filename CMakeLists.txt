@@ -27,6 +27,9 @@ add_executable(edu-DirMonitor
         src/server.cpp
 
         test/dirmonitor_test.h
+
+        src/logger.h
+        src/logger.cpp
         )
 
 find_path(HIREDIS_HEADER hiredis)
@@ -55,4 +58,5 @@ target_link_libraries(edu-DirMonitor PRIVATE nlohmann_json::nlohmann_json)
 
 
 target_link_libraries(edu-DirMonitor PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+
 

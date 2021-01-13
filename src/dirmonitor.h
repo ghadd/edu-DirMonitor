@@ -15,6 +15,8 @@
 #include <nlohmann/json.hpp>
 #include <utility>
 
+#include "logger.h"
+
 using namespace std::chrono_literals;
 using namespace sw::redis;
 using nlohmann::json;
@@ -53,10 +55,16 @@ public:
     static Redis redis;
 
     explicit DirMonitor(const QDir &dir, QStringList fileExtensions = QStringList())
-        : monitoringDir_(dir), fileExtensions_(std::move(fileExtensions)) {};
+        : monitoringDir_(dir), fileExtensions_(std::move(fileExtensions)) {
+        server_logger = spdlog::get("server_logger");
+        server_warn_logger = spdlog::get("server_warn_logger");
+    };
 
     explicit DirMonitor(const QString &dirPath, QStringList fileExtensions = QStringList())
-        : monitoringDir_(QDir(dirPath)), fileExtensions_(std::move(fileExtensions)) {};
+        : monitoringDir_(QDir(dirPath)), fileExtensions_(std::move(fileExtensions)) {
+        server_logger = spdlog::get("server_logger");
+        server_warn_logger = spdlog::get("server_warn_logger");
+    };
 
     QPair<QVector<FileInfo>, quint64> applyMonitor();
 
@@ -72,6 +80,8 @@ private:
     QDir monitoringDir_;
     QStringList fileExtensions_;
     QPair<QVector<FileInfo>, quint64> lastResult_;
+
+
 };
 
 class PathError : public QException {

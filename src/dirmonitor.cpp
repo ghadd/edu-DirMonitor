@@ -3,9 +3,15 @@
 Redis DirMonitor::redis = Redis("tcp://127.0.0.1:6379");
 
 void DirMonitor::validatePath() const {
+
+    server_logger->debug("Validating the path");
+
   if (!monitoringDir_.exists() || monitoringDir_.absolutePath() == "") {
+    server_logger->error("Invalid path given");
     throw PathError();
   }
+
+  server_logger->info("Path validation succeded");
 }
 
 void DirMonitor::saveExpiring() const {
@@ -29,6 +35,8 @@ DirMonitor::jsonify(const QPair<QVector<FileInfo>, quint64> &obj) {
 
 void DirMonitor::loadCachedResult() {
   std::string key = monitoringDir_.absolutePath().toStdString();
+  server_logger->debug("Loading cached result");
+
   auto result = redis.get(key);
   if (!result)
     throw std::runtime_error("Non existing value");
@@ -43,6 +51,7 @@ void DirMonitor::loadCachedResult() {
   }
 
   lastResult_ = qMakePair(infos, jsonObj["total"]);
+
 }
 
 QPair<QVector<FileInfo>, quint64> DirMonitor::applyMonitor() {
@@ -75,3 +84,5 @@ QPair<QVector<FileInfo>, quint64> DirMonitor::applyMonitor() {
   }
   return lastResult_;
 }
+
+
